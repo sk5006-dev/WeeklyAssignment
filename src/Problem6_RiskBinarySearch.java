@@ -11,6 +11,7 @@ public class Problem6_RiskBinarySearch {
     static int ceiling(int[] arr, int target) {
         for (int val : arr) {
             if (val >= target) return val;
+
         }
         return -1;
     }
