@@ -1,73 +1,85 @@
-import java.util.*;
+import java.util.Arrays;
 
 class Client {
-    String name;
-    int riskScore;
-    double balance;
+    final String name;
+    final int riskScore;
+    final double accountBalance;
 
-    Client(String name, int riskScore, double balance) {
+    Client(String name, int riskScore, double accountBalance) {
         this.name = name;
         this.riskScore = riskScore;
-        this.balance = balance;
+        this.accountBalance = accountBalance;
     }
 
+    @Override
     public String toString() {
-        return name + ":" + riskScore;
+        return name + "(" + riskScore + ", " + accountBalance + ")";
     }
 }
 
 public class Problem2_ClientRiskRanking {
 
-    // Bubble Sort (ascending risk)
-    static void bubbleSort(Client[] arr) {
+    static int bubbleSortAscending(Client[] clients) {
         int swaps = 0;
-        for (int i = 0; i < arr.length - 1; i++) {
-            for (int j = 0; j < arr.length - i - 1; j++) {
-                if (arr[j].riskScore > arr[j + 1].riskScore) {
-                    Client temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
+        for (int i = 0; i < clients.length - 1; i++) {
+            boolean swapped = false;
+            for (int j = 0; j < clients.length - i - 1; j++) {
+                if (clients[j].riskScore > clients[j + 1].riskScore) {
+                    Client temp = clients[j];
+                    clients[j] = clients[j + 1];
+                    clients[j + 1] = temp;
                     swaps++;
+                    swapped = true;
                 }
             }
+            if (!swapped) {
+                break;
+            }
         }
-        System.out.println("Swaps: " + swaps);
+        return swaps;
     }
 
-    // Insertion Sort (DESC risk + balance)
-    static void insertionSort(Client[] arr) {
-        for (int i = 1; i < arr.length; i++) {
-            Client key = arr[i];
+    static void insertionSortDescending(Client[] clients) {
+        for (int i = 1; i < clients.length; i++) {
+            Client key = clients[i];
             int j = i - 1;
 
-            while (j >= 0 &&
-                    (arr[j].riskScore < key.riskScore ||
-                            (arr[j].riskScore == key.riskScore &&
-                                    arr[j].balance < key.balance))) {
-
-                arr[j + 1] = arr[j];
+            while (j >= 0 && compareDescending(clients[j], key) > 0) {
+                clients[j + 1] = clients[j];
                 j--;
             }
-            arr[j + 1] = key;
+            clients[j + 1] = key;
         }
+    }
+
+    static int compareDescending(Client left, Client right) {
+        int riskComparison = Integer.compare(right.riskScore, left.riskScore);
+        if (riskComparison != 0) {
+            return riskComparison;
+        }
+        return Double.compare(right.accountBalance, left.accountBalance);
+    }
+
+    static Client[] topHighestRiskClients(Client[] clients, int limit) {
+        return Arrays.copyOf(clients, Math.min(limit, clients.length));
     }
 
     public static void main(String[] args) {
         Client[] clients = {
-                new Client("A", 20, 1000),
-                new Client("B", 50, 2000),
-                new Client("C", 80, 500)
+                new Client("clientC", 80, 1500),
+                new Client("clientA", 20, 4000),
+                new Client("clientB", 50, 2500),
+                new Client("clientD", 80, 3000)
         };
 
-        bubbleSort(clients);
-        System.out.println("Ascending: " + Arrays.toString(clients));
+        Client[] ascending = Arrays.copyOf(clients, clients.length);
+        int swaps = bubbleSortAscending(ascending);
+        System.out.println("Bubble (asc): " + Arrays.toString(ascending));
+        System.out.println("Bubble swaps: " + swaps);
 
-        insertionSort(clients);
-        System.out.println("Descending: " + Arrays.toString(clients));
-
-        System.out.println("Top risks:");
-        for (int i = 0; i < Math.min(10, clients.length); i++) {
-            System.out.println(clients[i]);
-        }
+        Client[] descending = Arrays.copyOf(clients, clients.length);
+        insertionSortDescending(descending);
+        System.out.println("Insertion (risk desc + balance desc): " + Arrays.toString(descending));
+        System.out.println("Top risks: " + Arrays.toString(topHighestRiskClients(descending, 10)));
     }
 }
